@@ -58,7 +58,7 @@ Each of the four submenus shows the same list of presets, grouped by brightness,
   - `Night UI`
   - `Night book`
 - Tap a preset to apply it to that target.
-- Long‑press a preset to edit or duplicate it.
+- Long‑press a preset to edit or delete it.
 - Use **Add theme…** to create a new custom preset.
 - Use **Restore themes to default** to return to KOReader’s stock `Default Day` / `Default Night` behavior.
 
