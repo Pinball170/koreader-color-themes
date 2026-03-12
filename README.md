@@ -26,70 +26,40 @@ Inspired by and partially based on ideas from [`Euphoriyy/KOReader.patches`](htt
 
 ### Light themes
 
-<div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#FFFFFF;color:#000000;border:1px solid #ccc;">
-    Default day
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#F2F2F2;color:#1A1A1A;border:1px solid #ccc;">
-    Paper
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#ECECEC;color:#1A1A1A;border:1px solid #ccc;">
-    Soft gray
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#F3EFD8;color:#111111;border:1px solid #ccc;">
-    Cream
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#F7E9D0;color:#2A1F14;border:1px solid #ccc;">
-    Soft sand
-  </div>
-    <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#F5E6C8;color:#2C1A0E;border:1px solid #ccc;">
-    Sepia
-  </div>
-    <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#EBE0C8;color:#2C1A0E;border:1px solid #ccc;">
-    Parchment
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#EBE0C9;color:#645031;border:1px solid #ccc;">
-    Parchment soft
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#E3D1B3;color:#422A14;border:1px solid #ccc;">
-    Warm Sepia
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#D4E8D0;color:#1A3320;border:1px solid #ccc;">
-    Green Tea
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#E8F0F8;color:#0D1B2A;border:1px solid #ccc;">
-    Arctic Blue
-  </div>
-</div>
+<p>
+  <img src="assets/Default%20day.svg" alt="Default day" width="130" />
+  <img src="assets/Paper.svg" alt="Paper" width="130" />
+  <img src="assets/Soft%20gray.svg" alt="Soft gray" width="130" />
+  <img src="assets/Cream.svg" alt="Cream" width="130" />
+  <img src="assets/Soft%20sand.svg" alt="Soft sand" width="130" />
+  <img src="assets/Sepia.svg" alt="Sepia" width="130" />
+  <img src="assets/Parchment.svg" alt="Parchment" width="130" />
+  <img src="assets/Parchment%20soft.svg" alt="Parchment soft" width="130" />
+  <img src="assets/Warm%20Sepia.svg" alt="Warm Sepia" width="130" />
+  <img src="assets/Green%20Tea.svg" alt="Green Tea" width="130" />
+  <img src="assets/Arctic%20Blue.svg" alt="Arctic Blue" width="130" />
+</p>
 
 ### Dark themes
 
-<div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#000000;color:#FFFFFF;border:1px solid #ccc;">
-    Default night
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#050505;color:#E0E0E0;border:1px solid #ccc;">
-    Ink
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#1A1A1A;color:#F5F5F5;border:1px solid #ccc;">
-    Mono Dark
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#282A2C;color:#FFFFFF;border:1px solid #ccc;">
-    Twilight
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#121212;color:#B0B0B0;border:1px solid #ccc;">
-    Soft night
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#2C3E50;color:#DCDCDC;border:1px solid #ccc;">
-    Slate
-  </div>
-  <div style="display:inline-block;width:130px;text-align:center;padding:6px;margin:4px;border-radius:8px;background:#14100A;color:#FAD08A;border:1px solid #ccc;">
-    Amber Night
-  </div>
-</div>
+<p>
+  <img src="assets/Default%20night.svg" alt="Default night" width="130" />
+  <img src="assets/Ink.svg" alt="Ink" width="130" />
+  <img src="assets/Mono%20Dark.svg" alt="Mono Dark" width="130" />
+  <img src="assets/Twilight.svg" alt="Twilight" width="130" />
+  <img src="assets/Soft%20night.svg" alt="Soft night" width="130" />
+  <img src="assets/Slate.svg" alt="Slate" width="130" />
+  <img src="assets/Amber%20Night.svg" alt="Amber Night" width="130" />
+</p>
 
 ## Usage
 
 - Open **Settings → Theme** in KOReader.
 - Tap to select a theme
 - Long‑press a theme to edit or duplicate it
+
+## Support
+
+If this patch is useful to you and you'd like to support further development of KOReader-related projects, you can support me on Ko‑fi:
+
+[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/artemartemenko)
