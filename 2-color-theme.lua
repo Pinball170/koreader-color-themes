@@ -64,6 +64,7 @@ local DarkPresets = Setting("color_theme_dark_presets", {
     "amber_night",
     "ink",
     "mono_dark",
+    "stay_with_ukraine",
 })
 
 
@@ -88,6 +89,7 @@ local PRESETS = {
     { key = "dim_night",     label = "Dim Night",      bg = "#121212", fg = "#B0B0B0" },
     { key = "slate",         label = "Slate",          bg = "#2C3E50", fg = "#DCDCDC" },
     { key = "amber_night",   label = "Amber Night",    bg = "#14100A", fg = "#FAD08A" },
+    { key = "stay_with_ukraine", label = "Dyakuyu", bg = "#1B305A", fg = "#F3D79A" },
 }
 
 local function all_presets()
@@ -668,6 +670,7 @@ local function restore_themes_to_default(touchmenu_instance)
                             "amber_night",
                             "ink",
                             "mono_dark",
+                            "stay_with_ukraine",
                         })
                         G_reader_settings:flush()
                         refreshUI()
