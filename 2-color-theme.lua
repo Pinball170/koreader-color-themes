@@ -38,21 +38,29 @@ local T = require("ffi/util").template
 
 local function Setting(name, default)
     local self = {}
-    self.get = function() return G_reader_settings:readSetting(name, default) end
+    self.get = function()
+        local v = G_reader_settings:readSetting(name)
+        if v == nil then return default end
+        return v
+    end
     self.set = function(value) return G_reader_settings:saveSetting(name, value) end
     self.toggle = function() G_reader_settings:toggle(name) end
     return self
 end
 
 local ActivePreset = Setting("color_theme_preset", "parchment")
+local ActivePresetUI = Setting("color_theme_preset_ui", nil)
+local ActivePresetBook = Setting("color_theme_preset_book", nil)
 local NightPreset = Setting("color_theme_preset_night", "default_night")
+local NightPresetUI = Setting("color_theme_preset_night_ui", nil)
+local NightPresetBook = Setting("color_theme_preset_night_book", nil)
 local CustomPresets = Setting("color_theme_custom_presets", {})
 local DisabledPresets = Setting("color_theme_disabled_presets", {})
 local DarkPresets = Setting("color_theme_dark_presets", {
     "default_night",
     "slate",
     "twilight",
-    "night",
+    "dim_night",
     "amber_night",
     "ink",
     "mono_dark",
@@ -60,26 +68,26 @@ local DarkPresets = Setting("color_theme_dark_presets", {
 
 
 local PRESETS = {
-    { key = "white",        label = "Default day",     bg = "#FFFFFF", fg = "#000000" },
+    { key = "white",        label = "Default Day",     bg = "#FFFFFF", fg = "#000000" },
     { key = "paper",        label = "Paper",           bg = "#F2F2F2", fg = "#1A1A1A" },
-    { key = "soft_gray",    label = "Soft gray",       bg = "#ECECEC", fg = "#1A1A1A" },
+    { key = "light_gray",   label = "Light Gray",      bg = "#EDEDED", fg = "#4F4F4F" },
+    { key = "warm_stone",   label = "Warm Stone",      bg = "#D7D5D3", fg = "#000000" },
     { key = "cream",        label = "Cream",           bg = "#F3EFD8", fg = "#111111" },
-    { key = "soft_sand",    label = "Soft sand",       bg = "#F7E9D0", fg = "#2A1F14" },
-    { key = "parchment",    label = "Parchment",       bg = "#EBE0C8", fg = "#2C1A0E" },
-    { key = "parchment_soft", label = "Parchment soft", bg = "#EBE0C9", fg = "#645031" },
+    { key = "parchment",    label = "Parchment",       bg = "#EBE0C9", fg = "#2C1A0E" },
+    { key = "soft_parchment", label = "Soft Parchment", bg = "#EBE0C9", fg = "#645031" },
     { key = "sepia",        label = "Sepia",           bg = "#F5E6C8", fg = "#2C1A0E" },
     { key = "warm_sepia",   label = "Warm Sepia",      bg = "#E3D1B3", fg = "#422A14" },
     { key = "green_tea",    label = "Green Tea",       bg = "#D4E8D0", fg = "#1A3320" },
-    { key = "arctic",       label = "Arctic Blue",     bg = "#E8F0F8", fg = "#0D1B2A" },
+    { key = "arctic",       label = "Arctic",          bg = "#E8F0F8", fg = "#0D1B2A" },
+    { key = "cool_mist",    label = "Cool Mist",       bg = "#EBEFF5", fg = "#052F75" },
 
-
-    { key = "default_night",   label = "Default night",    bg = "#000000", fg = "#FFFFFF" },
-    { key = "ink",             label = "Ink",              bg = "#050505", fg = "#E0E0E0" },
-    { key = "mono_dark",       label = "Mono Dark",        bg = "#1A1A1A", fg = "#F5F5F5" },
-    { key = "twilight",        label = "Twilight",         bg = "#282A2C", fg = "#FFFFFF" },
-    { key = "night",           label = "Soft night",       bg = "#121212", fg = "#B0B0B0" },
-    { key = "slate",           label = "Slate",            bg = "#2C3E50", fg = "#DCDCDC" },
-    { key = "amber_night",     label = "Amber Night",      bg = "#14100A", fg = "#FAD08A" },
+    { key = "default_night", label = "Default Night",  bg = "#000000", fg = "#FFFFFF" },
+    { key = "ink",           label = "Ink",            bg = "#050505", fg = "#E0E0E0" },
+    { key = "mono_dark",     label = "Mono Dark",      bg = "#1A1A1A", fg = "#F5F5F5" },
+    { key = "twilight",      label = "Twilight",       bg = "#282A2C", fg = "#FFFFFF" },
+    { key = "dim_night",     label = "Dim Night",      bg = "#121212", fg = "#B0B0B0" },
+    { key = "slate",         label = "Slate",          bg = "#2C3E50", fg = "#DCDCDC" },
+    { key = "amber_night",   label = "Amber Night",    bg = "#14100A", fg = "#FAD08A" },
 }
 
 local function all_presets()
@@ -195,12 +203,18 @@ local function lightenColor(c, amount)
     )
 end
 
+local function colorToHex(c)
+    if not c then return "#000000" end
+    return string.format("#%02X%02X%02X", c:getR(), c:getG(), c:getB())
+end
+
 local function get_dpi_scale()
     local size_scale = math.min(Screen:getWidth(), Screen:getHeight()) * (1 / 600)
     local dpi_scale = Screen:scaleByDPI(1)
     return math.max(0, (math.log((size_scale + dpi_scale) / 2) / 0.69) ^ 2)
 end
 local DPI_SCALE = get_dpi_scale()
+local ICON_MAX_DIM = Screen:scaleBySize(96)
 
 local ImageCache = Cache:new {
     size = 8 * 1024 * 1024,
@@ -221,41 +235,81 @@ local bg_cached = {
     font_fgcolor = nil,
     bg_hex = "",
     fg_hex = "",
+    book_bgcolor = nil,
+    book_fgcolor = nil,
+    book_font_fgcolor = nil,
+    book_bg_hex = "",
+    book_fg_hex = "",
 }
 
-local function recomputeColors()
-    local preset_key = ActivePreset.get()
+local function resolveActivePreset(active_setting, night_setting)
+    local key = active_setting.get()
     if Screen.night_mode then
-        local night_key = NightPreset.get()
-        if night_key and night_key ~= "" then
-            preset_key = night_key
-        end
+        local nk = night_setting.get()
+        if nk and nk ~= "" then key = nk end
     end
+    return key
+end
 
+local function computeColorsForPreset(preset_key)
     local p = presetByKey(preset_key)
     local bg_hex = p.bg or "#FFFFFF"
     local fg_hex = p.fg or "#000000"
-    bg_cached.bg_hex = bg_hex
-    bg_cached.fg_hex = fg_hex
-    if bg_hex ~= bg_cached.last_bg_hex or fg_hex ~= bg_cached.last_fg_hex then
-        local bg_color = Blitbuffer.colorFromString(bg_hex)
-        local font_color = Blitbuffer.colorFromString(fg_hex)
-        if Screen.night_mode and Screen.bb and Screen.bb.getInverse and Screen.bb:getInverse() == 1 then
-            bg_color = bg_color:invert()
-            font_color = font_color:invert()
+    local bg_color = Blitbuffer.colorFromString(bg_hex)
+    local font_color = Blitbuffer.colorFromString(fg_hex)
+    if Screen.night_mode and Screen.bb and Screen.bb.getInverse and Screen.bb:getInverse() == 1 then
+        bg_color = bg_color:invert()
+        font_color = font_color:invert()
+    end
+    local fg_color = Blitbuffer.ColorRGB32(
+        bg_color:getR() * 0.6,
+        bg_color:getG() * 0.6,
+        bg_color:getB() * 0.6
+    )
+    return bg_hex, fg_hex, bg_color, fg_color, font_color
+end
+
+local function recomputeColors()
+    local ui_key
+    local book_key
+
+    if Screen.night_mode then
+        ui_key = NightPresetUI.get()
+        if not ui_key or ui_key == "" then
+            ui_key = NightPreset.get()
         end
 
-        bg_cached.bgcolor = bg_color
-        bg_cached.font_fgcolor = font_color
-        bg_cached.last_bg_hex = bg_hex
-        bg_cached.last_fg_hex = fg_hex
+        book_key = NightPresetBook.get()
+        if not book_key or book_key == "" then
+            book_key = NightPreset.get()
+        end
+    else
+        ui_key = ActivePresetUI.get()
+        if not ui_key or ui_key == "" then
+            ui_key = ActivePreset.get()
+        end
+
+        book_key = ActivePresetBook.get()
+        if not book_key or book_key == "" then
+            book_key = ActivePreset.get()
+        end
     end
 
-    bg_cached.fgcolor = Blitbuffer.ColorRGB32(
-        bg_cached.bgcolor:getR() * 0.6,
-        bg_cached.bgcolor:getG() * 0.6,
-        bg_cached.bgcolor:getB() * 0.6
-    )
+    local bg_hex, fg_hex, bg_color, fg_color, font_color = computeColorsForPreset(ui_key)
+    bg_cached.bg_hex = bg_hex
+    bg_cached.fg_hex = fg_hex
+    bg_cached.bgcolor = bg_color
+    bg_cached.fgcolor = fg_color
+    bg_cached.font_fgcolor = font_color
+    bg_cached.last_bg_hex = bg_hex
+    bg_cached.last_fg_hex = fg_hex
+
+    local bbg_hex, bfg_hex, bbg_color, bfg_color, bfont_color = computeColorsForPreset(book_key)
+    bg_cached.book_bg_hex = bbg_hex
+    bg_cached.book_fg_hex = bfg_hex
+    bg_cached.book_bgcolor = bbg_color
+    bg_cached.book_fgcolor = bfg_color
+    bg_cached.book_font_fgcolor = bfont_color
 end
 
 recomputeColors()
@@ -278,8 +332,8 @@ local function applyProgressBarTheme()
     if not has_document_open() or not ReaderUI.instance.footer then return end
     local footer = ReaderUI.instance.footer
     if not footer.progress_bar then return end
-    footer.progress_bar.fillcolor = bg_cached.font_fgcolor
-    footer.progress_bar.bgcolor = bg_cached.bgcolor
+    footer.progress_bar.fillcolor = bg_cached.book_font_fgcolor
+    footer.progress_bar.bgcolor = bg_cached.book_bgcolor
     footer:refreshFooter(true)
 end
 
@@ -572,77 +626,236 @@ local function open_custom_theme_dialog(touchmenu_instance, preset)
     ask_name()
 end
 
+local function restore_themes_to_default(touchmenu_instance)
+    local dialog
+    dialog = ButtonDialog:new({
+        buttons = {
+            {
+                {
+                    text = _("Cancel"),
+                    callback = function()
+                        UIManager:close(dialog)
+                    end,
+                },
+                {
+                    text = _("OK"),
+                    callback = function()
+                        UIManager:close(dialog)
+                        local custom = CustomPresets.get() or {}
+                        local builtin_keys = {}
+                        for _, p in ipairs(PRESETS) do
+                            builtin_keys[p.key] = true
+                        end
+                        local new_custom = {}
+                        for _, p in ipairs(custom) do
+                            if not builtin_keys[p.key] then
+                                table.insert(new_custom, p)
+                            end
+                        end
+                        CustomPresets.set(new_custom)
+                        DisabledPresets.set({})
+                        ActivePreset.set("white")
+                        ActivePresetUI.set("")
+                        ActivePresetBook.set("")
+                        NightPreset.set("default_night")
+                        NightPresetUI.set("")
+                        NightPresetBook.set("")
+                        DarkPresets.set({
+                            "default_night",
+                            "slate",
+                            "twilight",
+                            "dim_night",
+                            "amber_night",
+                            "ink",
+                            "mono_dark",
+                        })
+                        G_reader_settings:flush()
+                        refreshUI()
+                        if touchmenu_instance then touchmenu_instance:updateItems() end
+                    end,
+                },
+            },
+        },
+        width_factor = 0.6,
+    })
+    UIManager:show(dialog)
+end
+
+local function getEffectiveUIPreset(is_night)
+    if is_night then
+        local k = NightPresetUI.get()
+        if k and k ~= "" then return k end
+        return NightPreset.get()
+    else
+        local k = ActivePresetUI.get()
+        if k and k ~= "" then return k end
+        return ActivePreset.get()
+    end
+end
+
+local function getEffectiveBookPreset(is_night)
+    if is_night then
+        local k = NightPresetBook.get()
+        if k and k ~= "" then return k end
+        return NightPreset.get()
+    else
+        local k = ActivePresetBook.get()
+        if k and k ~= "" then return k end
+        return ActivePreset.get()
+    end
+end
+
+local function build_theme_submenu(target, is_night)
+    local function get_current_key()
+        if target == "ui_day" then
+            return getEffectiveUIPreset(false)
+        elseif target == "book_day" then
+            return getEffectiveBookPreset(false)
+        elseif target == "ui_night" then
+            return getEffectiveUIPreset(true)
+        elseif target == "book_night" then
+            return getEffectiveBookPreset(true)
+        end
+    end
+
+    local function set_current_key(key)
+        if target == "ui_day" then
+            ActivePresetUI.set(key)
+        elseif target == "book_day" then
+            ActivePresetBook.set(key)
+        elseif target == "ui_night" then
+            NightPresetUI.set(key)
+        elseif target == "book_night" then
+            NightPresetBook.set(key)
+        end
+        G_reader_settings:flush()
+        refreshUI()
+    end
+
+    return function()
+        local items = {}
+        local light_presets = {}
+        local dark_presets = {}
+
+        for _, p in ipairs(all_presets()) do
+            local bg_hex = p.bg or "#FFFFFF"
+            if preset_is_dark(p.key, bg_hex) then
+                table.insert(dark_presets, p)
+            else
+                table.insert(light_presets, p)
+            end
+        end
+
+        local function label_for_group(is_dark_group)
+            local base
+            if target == "ui_day" then
+                base = _("Day UI")
+            elseif target == "book_day" then
+                base = _("Day book")
+            elseif target == "ui_night" then
+                base = _("Night UI")
+            elseif target == "book_night" then
+                base = _("Night book")
+            else
+                base = _("Themes")
+            end
+            local suffix = is_dark_group and _("Dark themes") or _("Light themes")
+            return T(_("%1 - %2"), base, suffix)
+        end
+
+        local function add_group(is_dark_group, presets)
+            if #presets == 0 then return end
+
+            table.insert(items, {
+                text = label_for_group(is_dark_group),
+                keep_menu_open = true,
+                enabled_func = function() return false end,
+            })
+
+            for _, p in ipairs(presets) do
+                local lp = p
+                table.insert(items, {
+                    text = presetLabelWithSwatch(lp),
+                    checked_func = function()
+                        return get_current_key() == lp.key
+                    end,
+                    callback = function(touchmenu_instance)
+                        set_current_key(lp.key)
+                        if touchmenu_instance then touchmenu_instance:updateItems() end
+                    end,
+                    keep_menu_open = false,
+                    hold_callback = function(touchmenu_instance)
+                        if lp.key == "white" or lp.key == "default_night" then return end
+                        open_custom_theme_dialog(touchmenu_instance, lp)
+                    end,
+                })
+            end
+        end
+
+        if is_night then
+            add_group(true, dark_presets)
+            add_group(false, light_presets)
+        else
+            add_group(false, light_presets)
+            add_group(true, dark_presets)
+        end
+
+        return items
+    end
+end
+
+local function color_theme_ui_day_menu()
+    return {
+        text_func = function()
+            local ui_day = presetByKey(getEffectiveUIPreset(false)).label
+            return T(_("Day UI: %1"), ui_day)
+        end,
+        sub_item_table_func = build_theme_submenu("ui_day", false),
+    }
+end
+
+local function color_theme_book_day_menu()
+    return {
+        text_func = function()
+            local book_day = presetByKey(getEffectiveBookPreset(false)).label
+            return T(_("Day book: %1"), book_day)
+        end,
+        sub_item_table_func = build_theme_submenu("book_day", false),
+    }
+end
+
+local function color_theme_ui_night_menu()
+    return {
+        text_func = function()
+            local ui_night = presetByKey(getEffectiveUIPreset(true)).label
+            return T(_("Night UI: %1"), ui_night)
+        end,
+        sub_item_table_func = build_theme_submenu("ui_night", true),
+    }
+end
+
+local function color_theme_book_night_menu()
+    return {
+        text_func = function()
+            local book_night = presetByKey(getEffectiveBookPreset(true)).label
+            return T(_("Night book: %1"), book_night)
+        end,
+        sub_item_table_func = build_theme_submenu("book_night", true),
+    }
+end
+
 local function color_theme_menu()
     return {
         text_func = function()
-            local day_label = presetByKey(ActivePreset.get()).label
-            local night_label = presetByKey(NightPreset.get()).label
-            return T(_("Theme: %1 / %2"), day_label, night_label)
+            return _("Themes")
         end,
         sub_item_table_func = function()
             local items = {}
-            local light_presets = {}
-            local dark_presets = {}
-            for _, p in ipairs(all_presets()) do
-                local bg_hex = p.bg or "#FFFFFF"
-                if preset_is_dark(p.key, bg_hex) then
-                    table.insert(dark_presets, p)
-                else
-                    table.insert(light_presets, p)
-                end
-            end
 
-            if #light_presets > 0 then
-                table.insert(items, {
-                    text = _("Light themes"),
-                    keep_menu_open = true,
-                    enabled_func = function() return false end,
-                })
-                for _, p in ipairs(light_presets) do
-                    table.insert(items, {
-                        text = presetLabelWithSwatch(p),
-                        checked_func = function() return ActivePreset.get() == p.key end,
-                        callback = function(touchmenu_instance)
-                            ActivePreset.set(p.key)
-                            G_reader_settings:flush()
-                            refreshUI()
-                            if touchmenu_instance then touchmenu_instance:updateItems() end
-                        end,
-                        keep_menu_open = true,
-                        hold_callback = function(touchmenu_instance)
-                            if p.key == "white" or p.key == "default_night" then return end
-                            open_custom_theme_dialog(touchmenu_instance, p)
-                        end,
-                    })
-                end
-            end
-
-            if #dark_presets > 0 then
-                table.insert(items, {
-                    text = _("Dark themes"),
-                    keep_menu_open = true,
-                    enabled_func = function() return false end,
-                })
-                for _, p in ipairs(dark_presets) do
-                    table.insert(items, {
-                        text = presetLabelWithSwatch(p),
-                        checked_func = function() return NightPreset.get() == p.key end,
-                        callback = function(touchmenu_instance)
-                            NightPreset.set(p.key)
-                            G_reader_settings:flush()
-                            if Screen.night_mode then
-                                refreshUI()
-                            end
-                            if touchmenu_instance then touchmenu_instance:updateItems() end
-                        end,
-                        keep_menu_open = true,
-                        hold_callback = function(touchmenu_instance)
-                            if p.key == "white" or p.key == "default_night" then return end
-                            open_custom_theme_dialog(touchmenu_instance, p)
-                        end,
-                    })
-                end
-            end
+            table.insert(items, color_theme_ui_day_menu())
+            table.insert(items, color_theme_book_day_menu())
+            table.insert(items, color_theme_ui_night_menu())
+            table.insert(items, color_theme_book_night_menu())
 
             table.insert(items, {
                 text = "----------------------------",
@@ -657,60 +870,15 @@ local function color_theme_menu()
                 end,
                 keep_menu_open = true,
             })
+
             table.insert(items, {
                 text = _("Restore themes to default"),
                 callback = function(touchmenu_instance)
-                    local dialog
-                    dialog = ButtonDialog:new({
-                        buttons = {
-                            {
-                                {
-                                    text = _("Cancel"),
-                                    callback = function()
-                                        UIManager:close(dialog)
-                                    end,
-                                },
-                                {
-                                    text = _("OK"),
-                                    callback = function()
-                                        UIManager:close(dialog)
-                                        local custom = CustomPresets.get() or {}
-                                        local builtin_keys = {}
-                                        for _, p in ipairs(PRESETS) do
-                                            builtin_keys[p.key] = true
-                                        end
-                                        local new_custom = {}
-                                        for _, p in ipairs(custom) do
-                                            if not builtin_keys[p.key] then
-                                                table.insert(new_custom, p)
-                                            end
-                                        end
-                                        CustomPresets.set(new_custom)
-                                        DisabledPresets.set({})
-                                        ActivePreset.set("parchment")
-                                        NightPreset.set("twilight")
-                                        DarkPresets.set({
-                                            "default_night",
-                                            "slate",
-                                            "twilight",
-                                            "night",
-                                            "amber_night",
-                                            "ink",
-                                            "mono_dark",
-                                        })
-                                        G_reader_settings:flush()
-                                        refreshUI()
-                                        if touchmenu_instance then touchmenu_instance:updateItems() end
-                                    end,
-                                },
-                            },
-                        },
-                        width_factor = 0.6,
-                    })
-                    UIManager:show(dialog)
+                    restore_themes_to_default(touchmenu_instance)
                 end,
                 keep_menu_open = true,
             })
+
             return items
         end,
     }
@@ -761,7 +929,9 @@ function FrameContainer:paintTo(bb, x, y)
     local original_background = self.background
     local original_color = self.color
     if original_background then
-        if not is_excluded(original_background) then
+        if self.use_book_background then
+            self.background = bg_cached.book_bgcolor
+        elseif not is_excluded(original_background) then
             self.background = bg_cached.bgcolor
         else
             self.background = self.original_background or Blitbuffer.COLOR_WHITE
@@ -775,14 +945,24 @@ end
 local original_ReaderFooter_updateFooterContainer = ReaderFooter.updateFooterContainer
 function ReaderFooter:updateFooterContainer()
     original_ReaderFooter_updateFooterContainer(self)
+    if self.footer_content and self.footer_content.background then
+        self.footer_content.use_book_background = true
+    end
 end
 
 local original_ReaderFooter_init = ReaderFooter.init
 function ReaderFooter:init()
     original_ReaderFooter_init(self)
+    if self.footer_content and self.footer_content.background then
+        self.footer_content.use_book_background = true
+    end
     if self.progress_bar then
-        self.progress_bar.fillcolor = bg_cached.font_fgcolor
-        self.progress_bar.bgcolor = bg_cached.bgcolor
+        self.progress_bar.fillcolor = bg_cached.book_font_fgcolor
+        self.progress_bar.bgcolor = bg_cached.book_bgcolor
+    end
+    if self.footer_text then
+        self.footer_text.original_fgcolor = bg_cached.book_font_fgcolor
+        self.footer_text.fgcolor = EXCLUSION_COLOR
     end
 end
 
@@ -862,21 +1042,25 @@ function ImageWidget:_loadfile()
             if not self.alpha then
                 local bbtype = self._bb:getType()
                 if bbtype == Blitbuffer.TYPE_BB8A or bbtype == Blitbuffer.TYPE_BBRGB32 then
-                    local icon_bb = Blitbuffer.new(self._bb.w, self._bb.h, Screen.bb:getType())
-                    if bg_cached.bgcolor then fillRGB(icon_bb, Screen.bb:getType(), bg_cached.bgcolor) end
-                    local mask_bb = Blitbuffer.new(self._bb.w, self._bb.h, Blitbuffer.TYPE_BB8)
-                    mask_bb:fill(Blitbuffer.Color8(0xFF))
-                    if self._is_straight_alpha then
-                        mask_bb:alphablitFrom(self._bb, 0, 0, 0, 0, mask_bb.w, mask_bb.h)
-                    else
-                        mask_bb:pmulalphablitFrom(self._bb, 0, 0, 0, 0, mask_bb.w, mask_bb.h)
+                    local w = self.width or self._bb.w
+                    local h = self.height or self._bb.h
+                    if w <= ICON_MAX_DIM and h <= ICON_MAX_DIM then
+                        local icon_bb = Blitbuffer.new(self._bb.w, self._bb.h, Screen.bb:getType())
+                        if bg_cached.bgcolor then fillRGB(icon_bb, Screen.bb:getType(), bg_cached.bgcolor) end
+                        local mask_bb = Blitbuffer.new(self._bb.w, self._bb.h, Blitbuffer.TYPE_BB8)
+                        mask_bb:fill(Blitbuffer.Color8(0xFF))
+                        if self._is_straight_alpha then
+                            mask_bb:alphablitFrom(self._bb, 0, 0, 0, 0, mask_bb.w, mask_bb.h)
+                        else
+                            mask_bb:pmulalphablitFrom(self._bb, 0, 0, 0, 0, mask_bb.w, mask_bb.h)
+                        end
+                        mask_bb:invertRect(0, 0, mask_bb.w, mask_bb.h)
+                        icon_bb:colorblitFromRGB32(mask_bb, 0, 0, 0, 0, icon_bb.w, icon_bb.h, bg_cached.font_fgcolor)
+                        mask_bb:free()
+                        self._unflattened = self._bb
+                        self._bb = icon_bb
+                        self._is_straight_alpha = nil
                     end
-                    mask_bb:invertRect(0, 0, mask_bb.w, mask_bb.h)
-                    icon_bb:colorblitFromRGB32(mask_bb, 0, 0, 0, 0, icon_bb.w, icon_bb.h, bg_cached.font_fgcolor)
-                    mask_bb:free()
-                    self._unflattened = self._bb
-                    self._bb = icon_bb
-                    self._is_straight_alpha = nil
                 end
             end
         end
@@ -993,7 +1177,9 @@ end
 local original_DictQuickLookup_getHtmlDictionaryCss = DictQuickLookup.getHtmlDictionaryCss
 function DictQuickLookup:getHtmlDictionaryCss()
     local css = original_DictQuickLookup_getHtmlDictionaryCss(self)
-    css = css .. string.format("\nbody { background-color: %s; color: %s; }\n", bg_cached.bg_hex, bg_cached.fg_hex)
+    local bg_hex = colorToHex(bg_cached.book_bgcolor or Blitbuffer.colorFromString(bg_cached.book_bg_hex))
+    local fg_hex = colorToHex(bg_cached.book_font_fgcolor or Blitbuffer.colorFromString(bg_cached.book_fg_hex))
+    css = css .. string.format("\nbody { background-color: %s; color: %s; }\n", bg_hex, fg_hex)
     return css
 end
 
@@ -1037,7 +1223,9 @@ end
 local original_ReaderStyleTweak_getCssText = ReaderStyleTweak.getCssText
 function ReaderStyleTweak:getCssText()
     local css = original_ReaderStyleTweak_getCssText(self)
-    css = string.format("body { background-color: %s !important; color: %s !important; }\n", bg_cached.bg_hex, bg_cached.fg_hex) .. css
+    local bg_hex = colorToHex(bg_cached.book_bgcolor or Blitbuffer.colorFromString(bg_cached.book_bg_hex))
+    local fg_hex = colorToHex(bg_cached.book_font_fgcolor or Blitbuffer.colorFromString(bg_cached.book_fg_hex))
+    css = string.format("body { background-color: %s !important; color: %s !important; }\n", bg_hex, fg_hex) .. css
     return util.trim(css)
 end
 

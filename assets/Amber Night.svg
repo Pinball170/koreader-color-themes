@@ -1116,7 +1116,7 @@
 	<g id="Amber_Night">
 	<path style="fill:#14100A;stroke:#B4B4B4;stroke-miterlimit:10;" d="M0.5,68.5v-56c0-6.6,5.4-12,12-12h236c6.6,0,12,5.4,12,12v56
 		c0,6.6-5.4,12-12,12h-236C5.9,80.5,0.5,75.1,0.5,68.5z"/>
-	<text transform="matrix(1 0 0 1 38.9373 52.7832)" style="fill:#FAD08A; font-family:'Georgia'; font-size:32px;">Amber Night</text>
+	<text transform="matrix(1 0 0 1 38.937 50.7832)" style="fill:#FAD08A; font-family:'Georgia'; font-size:32px;">Amber Night</text>
 </g>
 <g id="Layer_1">
 </g>
