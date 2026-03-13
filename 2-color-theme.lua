@@ -844,6 +844,7 @@ local function color_theme_book_night_menu()
             return T(_("Night book: %1"), book_night)
         end,
         sub_item_table_func = build_theme_submenu("book_night", true),
+        separator = true,
     }
 end
 
@@ -859,12 +860,6 @@ local function color_theme_menu()
             table.insert(items, color_theme_book_day_menu())
             table.insert(items, color_theme_ui_night_menu())
             table.insert(items, color_theme_book_night_menu())
-
-            table.insert(items, {
-                text = "----------------------------",
-                keep_menu_open = true,
-                enabled_func = function() return false end,
-            })
 
             table.insert(items, {
                 text = _("Add theme…"),
@@ -972,10 +967,6 @@ end
 local original_ScreenSaverWidget_init = ScreenSaverWidget.init
 function ScreenSaverWidget:init()
     original_ScreenSaverWidget_init(self)
-    -- Only override background if one actually exists (non-nil).
-    -- When screensaver fill is disabled, background is nil (transparent);
-    -- replacing it would cause FrameContainer:paintTo to fall back to
-    -- COLOR_WHITE instead of leaving the screen untouched.
     if self[1] and self[1].background ~= nil then
         self[1].original_background = self[1].background
         self[1].background = EXCLUSION_COLOR
@@ -1127,6 +1118,20 @@ end
 function IconWidget:onChangeBackgroundColor()
     self:free()
     self:init()
+end
+
+local Menu = require("ui/widget/menu")
+local orig_updateItems = Menu.updateItems
+Menu.updateItems = function(self, select_number, no_recalculate_dimen)
+    orig_updateItems(self, select_number, no_recalculate_dimen)
+    local idx_offset = (self.page - 1) * self.perpage
+    for i, widget in ipairs(self.item_group) do
+        local entry = self.item_table and self.item_table[idx_offset + i]
+        if entry and entry.separator and widget._underline_container then
+            widget._underline_container.color = bg_cached.font_fgcolor
+            widget._underline_container.linesize = Size.line.thick
+        end
+    end
 end
 
 function UnderlineContainer:paintTo(bb, x, y)
