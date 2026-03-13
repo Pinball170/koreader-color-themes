@@ -15,13 +15,13 @@ Tested on Android devices.
 ## Preview
 
 <p align="center">
-  <img src="assets/example.png" alt="Themes menu and book with Parchment theme" width="400" />
+  <img src="assets/example.png" alt="Themes menu and book with Parchment theme" width="300" />
 </p>
 
 ## Built‑in presets
 
 <p align="center">
-  <img src="assets/Themes.png" alt="Built-in themes preview" width="300" />
+  <img src="assets/Themes.png" alt="Built-in themes preview" width="600" />
 </p>
 
 …or add your own theme via **Add theme…** in the menu.
