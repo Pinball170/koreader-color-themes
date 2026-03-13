@@ -2,3 +2,4 @@
 
 ## 2029-03-13
 - Fix cover thumbnails inversion in the UI when using night mode.
+- Fix screensaver rendering so images with transparency are displayed correctly.

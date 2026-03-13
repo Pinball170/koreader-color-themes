@@ -972,8 +972,14 @@ end
 local original_ScreenSaverWidget_init = ScreenSaverWidget.init
 function ScreenSaverWidget:init()
     original_ScreenSaverWidget_init(self)
-    self[1].original_background = self.background
-    self[1].background = EXCLUSION_COLOR
+    -- Only override background if one actually exists (non-nil).
+    -- When screensaver fill is disabled, background is nil (transparent);
+    -- replacing it would cause FrameContainer:paintTo to fall back to
+    -- COLOR_WHITE instead of leaving the screen untouched.
+    if self[1] and self[1].background ~= nil then
+        self[1].original_background = self[1].background
+        self[1].background = EXCLUSION_COLOR
+    end
 end
 
 local function fillRGB(bb, bbtype, v)
