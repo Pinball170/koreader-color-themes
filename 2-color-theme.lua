@@ -1379,4 +1379,4 @@ function TextWidget:paintTo(bb, x, y)
     self.fgcolor = original_fgcolor
 end
 
-require("logger").info("2-color-theme: loaded (unified background + font + presets)")
+require("logger").info("2-color-theme: loaded (background + font + presets)")
