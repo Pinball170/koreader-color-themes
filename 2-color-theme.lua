@@ -886,7 +886,6 @@ local FileManagerMenu = require("apps/filemanager/filemanagermenu")
 local ReaderMenu = require("apps/reader/modules/readermenu")
 
 local function patch_menu(menu, order)
-    table.insert(order.setting, "----------------------------")
     table.insert(order.setting, "color_theme")
     menu.menu_items.color_theme = color_theme_menu()
 end
